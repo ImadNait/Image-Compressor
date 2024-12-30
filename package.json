@@ -1,0 +1,23 @@
+{
+  "name": "compressor",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev":"bun --watch index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/sharp": "^0.32.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/multer": "^1.4.12",
+    "elysia": "^1.2.9",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7",
+    "sharp": "^0.33.5"
+  }
+}

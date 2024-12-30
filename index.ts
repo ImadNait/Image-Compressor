@@ -17,13 +17,14 @@ const fileStorage = multer.diskStorage({
 
 
 const upload = multer({ storage: fileStorage })
-const multerMiddleware = upload.single("image");
+const singleUpload = upload.single("image");
+const multUpload = upload.array("image");
 app
 .get('/',()=> {return 'TEST TEST'})
 .post('/uploadS', async ({ request })=>{
     try{
     const fileData = await new Promise((resolve, reject) => {
-        multerMiddleware(request as any, {} as any, (err: any) => {
+        singleUpload(request as any, {} as any, (err: any) => {
           if (err) return reject(err);
           resolve((request as any).file);
         });
@@ -36,6 +37,25 @@ app
     }
 
 })
+
+.post("/uploadM",async({ request })=>{
+    try{
+    const filesData = await new Promise((resolve, reject)=>{
+        multUpload(request as any, {} as any, (err:any)=>{
+            if(err){
+                return reject(err);
+            }else{
+                resolve((request as any).file);
+            }
+        })
+    })
+    }catch(err){
+        console.log("Error:", err);
+        return { Error: "File upload failed successfully" , details: err }
+        
+    }
+})
+
 
 
 

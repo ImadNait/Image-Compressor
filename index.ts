@@ -1,16 +1,15 @@
 import {Elysia} from 'elysia';
 import multer from 'multer';
-import path from 'path';
-import sharp from 'sharp';
+
 
 
 const app = new Elysia();
 
 const fileStorage = multer.diskStorage({
-    destination:(req, file, clb)=>{
+    destination:(request, file, clb)=>{
         clb(null, './uploads');
     },
-    filename:(req, file, clb)=>{
+    filename:(request, file, clb)=>{
         clb(null, Date.now()+'---'+file.originalname);
     },
 })
@@ -18,7 +17,7 @@ const fileStorage = multer.diskStorage({
 
 const upload = multer({ storage: fileStorage })
 const singleUpload = upload.single("image");
-const multUpload = upload.array("image");
+const multUpload = upload.array("images", 10);
 app
 .get('/',()=> {return 'TEST TEST'})
 .post('/uploadS', async ({ request })=>{
@@ -29,8 +28,8 @@ app
           resolve((request as any).file);
         });
       });
-    console.log("Uploaded : ",fileData);
-    return "File uploaded successfully!"
+    console.log("Uploaded : ", (fileStorage as any).path);
+    return { message: 'File uploaded successfully!', file: (fileStorage as any).path };
     }catch(err){
         console.error("Error: ",err);
         return { Error: "File upload failed successfully" , details: err }
@@ -45,13 +44,15 @@ app
             if(err){
                 return reject(err);
             }else{
-                resolve((request as any).file);
+                resolve((request as any).files);
             }
         })
     })
+    console.log("Uploaded : ",filesData);
+    return { message: 'Files have been uploaded successfully!', file: filesData };
     }catch(err){
         console.log("Error:", err);
-        return { Error: "File upload failed successfully" , details: err }
+        return { Error: "Files upload failed successfully" , details: err }
         
     }
 })

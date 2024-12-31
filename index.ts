@@ -19,7 +19,7 @@ const upload = multer({ storage: fileStorage })
 const singleUpload = upload.single("image");
 const multUpload = upload.array("images", 10);
 app
-.get('/',()=> {return 'TEST TEST'})
+.get('/',()=> {return new Response(Bun.file("./public/index.html"))})
 .post('/uploadS', async ({ request })=>{
     try{
     const fileData = await new Promise((resolve, reject) => {

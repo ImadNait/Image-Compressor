@@ -1,65 +1,83 @@
-import {Elysia} from 'elysia';
+import express from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import sharp from 'sharp';
+const PORT = process.env.PORT;
+const app = express();
 
 
-
-const app = new Elysia();
-
-const fileStorage = multer.diskStorage({
-    destination:(request, file, clb)=>{
-        clb(null, './uploads');
-    },
-    filename:(request, file, clb)=>{
-        clb(null, Date.now()+'---'+file.originalname);
-    },
-})
+app.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 
-const upload = multer({ storage: fileStorage })
-const singleUpload = upload.single("image");
-const multUpload = upload.array("images", 10);
+const fileStorageEngine = multer.diskStorage({
+  destination: (req, file, cb) => {
+
+    const dir = './images';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '--' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: fileStorageEngine });
+
 app
-.get('/',()=> {return new Response(Bun.file("./public/index.html"))})
-.post('/uploadS', async ({ request })=>{
-    try{
-    const fileData = await new Promise((resolve, reject) => {
-        singleUpload(request as any, {} as any, (err: any) => {
-          if (err) return reject(err);
-          resolve((request as any).file);
-        });
-      });
-    console.log("Uploaded : ", (fileStorage as any).path);
-    return { message: 'File uploaded successfully!', file: (fileStorage as any).path };
-    }catch(err){
-        console.error("Error: ",err);
-        return { Error: "File upload failed successfully" , details: err }
-    }
-
-})
-
-.post("/uploadM",async({ request })=>{
-    try{
-    const filesData = await new Promise((resolve, reject)=>{
-        multUpload(request as any, {} as any, (err:any)=>{
-            if(err){
-                return reject(err);
-            }else{
-                resolve((request as any).files);
-            }
-        })
-    })
-    console.log("Uploaded : ",filesData);
-    return { message: 'Files have been uploaded successfully!', file: filesData };
-    }catch(err){
-        console.log("Error:", err);
-        return { Error: "Files upload failed successfully" , details: err }
-        
-    }
+.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public', 'index.html'));
 })
 
 
+.post('/singleUpload', upload.single('image'), async(req, res) => {
+  if (req.file) {
+    console.log('Uploaded File:', req.file);
+    res.send('Single File Upload Success');
+    const filePath = path.join(__dirname, 'images', req.file.filename);
+    const compressedFilePath = path.join(__dirname,'compressed', 'compressed-' + req.file.filename);
+  
+    try {
+
+      await sharp(filePath)
+        .resize(800) 
+        .toFile(compressedFilePath);
+  
+
+    fs.unlinkSync(filePath);
+  
+    const imageUrl = `/compressed-${req.file.filename}`;
+    res.send(`
+      <h3>File uploaded and compressed successfully!</h3>
+      <p>Click below to view the compressed image:</p>
+      <img src="${imageUrl}" alt="Compressed Image">
+    `);
+    } catch (error) {
+      res.status(500).send('Failed to compress the image');
+    }
+  } else {
+    res.status(400).send('No file uploaded');
+  }
+})
 
 
-.listen(5000,()=>{
-    console.log(`Server running on port ${5000}`);
+.post('/multipleUpload', upload.array('images', 3), (req, res) => {
+  if (req.files) {
+    console.log('Uploaded Files:', req.files);
+    res.send('Multiple Files Upload Success');
+  } else {
+    res.status(400).send('No files uploaded');
+  }
+})
+
+
+app.listen(PORT, () => {
+  console.log('Server running on port 5000');
 })

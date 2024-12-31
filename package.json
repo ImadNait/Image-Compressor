@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "bun run index.ts",
-    "dev":"bun --watch index.ts"
+    "dev": "bun --watch index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -14,8 +14,13 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "elysia": "^1.2.9",
+    "express": "^4.21.2",
+    "files": "^3.0.1",
+    "formidable": "^3.5.2",
+    "fs": "^0.0.1-security",
     "multer": "^1.4.5-lts.1",
     "path": "^0.12.7",
     "sharp": "^0.33.5"

@@ -1,5 +1,4 @@
 # compressor
-
 To install dependencies:
 
 ```bash

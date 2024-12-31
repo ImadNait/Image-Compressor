@@ -1,11 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor</title>
 </head>
 <body>
-    <h1>hello</h1>
+
+    <h1>Upload and Compress Image</h1>
+
+    <form action="/singleUpload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="image" required>
+      <button type="submit">Upload and Compress</button>
+    </form>
+  
+
+    <form action="/multipleUpload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="images" multiple required>
+      <button type="submit">Upload and Compress Multiple images</button>
+    </form>
+
+  <script>
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const action = form.getAttribute('action');
+
+        try {
+          const response = await fetch(action, {
+            method: 'POST',
+            body: formData
+          });
+
+          const result = await response.text();
+          document.getElementById('response').textContent = result;
+        } catch (error) {
+          document.getElementById('response').textContent = 'Error uploading files!';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

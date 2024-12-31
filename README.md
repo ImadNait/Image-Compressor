@@ -1,4 +1,4 @@
-# compressor
+# Images-compressor
 To install dependencies:
 
 ```bash
